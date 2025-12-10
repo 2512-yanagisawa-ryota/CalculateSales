@@ -40,6 +40,7 @@ public class CalculateSales {
 		}
 
 		// ※ここから集計処理を作成してください。(処理内容2-1、2-2)
+
 		File[] files = new File("C:\\Users\\yanagisawa.ryota\\Desktop\\売り上げ集計課題").listFiles();
 		List<File> rcdFiles = new ArrayList<>();
 		BufferedReader br = null;
@@ -50,21 +51,21 @@ public class CalculateSales {
 				rcdFiles.add(files[i]);
 			}
 		}
-
 		try {
 			for(int i = 0; i < rcdFiles.size(); i++) {
 				FileReader fr = new FileReader(rcdFiles.get(i));
 				br = new BufferedReader(fr);
+				List<String> readFilesContents = new ArrayList<>();
 
 				String line;
 				while((line = br.readLine()) != null) {
-					String [] items = line.split("\n");
-					if(i % 2 == 0) {
-						long fileSale = Long.parseLong(items[i+1]);
-						long saleAmount = branchSales.get(items[i]) + fileSale;
-						branchSales.put(items[i], saleAmount);
-					}
+					readFilesContents.add(line);
 				}
+
+				long fileSale = Long.parseLong(readFilesContents.get(1));
+				long saleAmount = branchSales.get(readFilesContents.get(0)) + fileSale;
+				branchSales.put(readFilesContents.get(0), saleAmount);
+
 			}
 		}catch(FileNotFoundException e){
 			System.out.println(FILE_NOT_EXIST);
