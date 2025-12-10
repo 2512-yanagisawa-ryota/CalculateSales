@@ -2,9 +2,12 @@ package jp.alhinc.calculate_sales;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CalculateSales {
@@ -37,8 +40,45 @@ public class CalculateSales {
 		}
 
 		// ※ここから集計処理を作成してください。(処理内容2-1、2-2)
+		File[] files = new File("C:\\Users\\yanagisawa.ryota\\Desktop\\売り上げ集計課題").listFiles();
+		List<File> rcdFiles = new ArrayList<>();
+		BufferedReader br = null;
 
+		for(int i = 0; i < files.length ; i++) {
+			String filesName = files[i].getName();
+			if(filesName.matches("[0-9]{8}.*")) {
+				rcdFiles.add(files[i]);
+			}
+		}
 
+		try {
+			for(int i = 0; i < rcdFiles.size(); i++) {
+				FileReader fr = new FileReader(rcdFiles.get(i));
+				br = new BufferedReader(fr);
+
+				String line;
+				while((line = br.readLine()) != null) {
+					String [] items = line.split("\n");
+					if(i % 2 == 0) {
+						long fileSale = Long.parseLong(items[i+1]);
+						long saleAmount = branchSales.get(items[i]) + fileSale;
+						branchSales.put(items[i], saleAmount);
+					}
+				}
+			}
+		}catch(FileNotFoundException e){
+			System.out.println(FILE_NOT_EXIST);
+		}catch(IOException e){
+			System.out.println(UNKNOWN_ERROR);
+		}finally {
+			if(br != null) {
+				try {
+					br.close();
+				} catch(IOException e) {
+					System.out.println(UNKNOWN_ERROR);
+				}
+			}
+		}
 
 		// 支店別集計ファイル書き込み処理
 		if(!writeFile(args[0], FILE_NAME_BRANCH_OUT, branchNames, branchSales)) {
