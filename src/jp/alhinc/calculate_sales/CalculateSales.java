@@ -1,9 +1,11 @@
 package jp.alhinc.calculate_sales;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,6 +73,8 @@ public class CalculateSales {
 			System.out.println(FILE_NOT_EXIST);
 		}catch(IOException e){
 			System.out.println(UNKNOWN_ERROR);
+		}catch(NumberFormatException e) {
+			System.out.println(FILE_INVALID_FORMAT);
 		}finally {
 			if(br != null) {
 				try {
@@ -143,7 +147,31 @@ public class CalculateSales {
 	 */
 	private static boolean writeFile(String path, String fileName, Map<String, String> branchNames, Map<String, Long> branchSales) {
 		// ※ここに書き込み処理を作成してください。(処理内容3-1)
+		BufferedWriter bw = null;
 
+		try {
+			File file = new File(path, fileName);
+			FileWriter fw = new FileWriter(file);
+			bw = new BufferedWriter(fw);
+
+            for(String key : branchNames.keySet()) {
+            	bw.write(key+","+branchNames.get(key)+","+ Integer.valueOf(branchSales.get(key).toString()));
+            	bw.newLine();
+            }
+			
+		}catch(IOException e) {
+			System.out.println(UNKNOWN_ERROR);
+			return false;
+		}finally {
+			if(bw != null) {
+				try {
+					bw.close();
+				} catch(IOException e) {
+					System.out.println(UNKNOWN_ERROR);
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
