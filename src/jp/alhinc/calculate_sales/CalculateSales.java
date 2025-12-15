@@ -3,11 +3,11 @@ package jp.alhinc.calculate_sales;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,24 +51,23 @@ public class CalculateSales {
 		}
 
 		// ※ここから集計処理を作成してください。(処理内容2-1、2-2)
-		File[] files = new File("C:\\Users\\yanagisawa.ryota\\Desktop\\売り上げ集計課題").listFiles();
+		File[] files = new File(args[0]).listFiles();
 		List<File> rcdFiles = new ArrayList<>();
 		BufferedReader br = null;
 
-		for(int i = 0; i < files.length ; i++) {
+		for(int i = 0; i < files.length; i++) {
 			String filesName = files[i].getName();
 			//ファイルなのか、ファイル名が数字8桁かどうかを確認 （エラー処理内容3）
-			if(files[i].isFile() &&filesName.matches("[0-9]{8}.*")) {
+			if(files[i].isFile() && filesName.matches("^[0-9]{8}.rcd$")) {
 				rcdFiles.add(files[i]);
 			}			
 		}
 
 		// 売上ファイルが連番か確認（エラー処理内容2-1）
-		for(int i = 0; i <rcdFiles.size()-1; i++ ) {
-			String filesName = rcdFiles.get(i).getName();
-			String NextfilesName = rcdFiles.get(i+1).getName();
-			int former = Integer.parseInt(filesName.toString().substring(0, 8)); 
-			int latter = Integer.parseInt(NextfilesName.toString().substring(0, 8)); 
+		Collections.sort(rcdFiles);
+		for(int i = 0; i < rcdFiles.size() - 1; i++ ) {
+			int former = Integer.parseInt(rcdFiles.get(i).getName().toString().substring(0, 8)); 
+			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().toString().substring(0, 8)); 
 			if((latter - former) != 1) {
 				System.out.println(FILE_NOT_SEQUENTIAL_NUMBER);
 				return;
@@ -78,54 +77,51 @@ public class CalculateSales {
 			for(int i = 0; i < rcdFiles.size(); i++) {
 				FileReader fr = new FileReader(rcdFiles.get(i));
 				br = new BufferedReader(fr);
-				List<String> readFilesContents = new ArrayList<>();
+				List<String> FilesContents = new ArrayList<>();
 
 				String line;
 				while((line = br.readLine()) != null) {
-					readFilesContents.add(line);
+					FilesContents.add(line);
 				}
 				//売上ファイルのフォーマットを確認（エラー処理内容2-4）
-				if(readFilesContents.size() != 2) {
-					System.out.println(rcdFiles.get(i) + SALES_FILE_INVALID_FORMAT);
+				if(FilesContents.size() != 2) {
+					System.out.println(rcdFiles.get(i).getName() + SALES_FILE_INVALID_FORMAT);
 					return;
 				}
 				
 				//Mapに特定のKeyが存在するか確認（エラー処理内容2-3）
-				if(!branchSales.containsKey(readFilesContents.get(0))) {
+				if(!branchNames.containsKey(FilesContents.get(0))) {
 					System.out.println(rcdFiles.get(i) + BRANCH_CODE_INVALID);
 					return;
 				}
 				
 				//売上金額が数字なのか確認（エラー処理内容3）
-				if(!readFilesContents.get(1).matches("\\d+")) {
+				if(!FilesContents.get(1).matches("^\\d+$")) {
 					System.out.println(UNKNOWN_ERROR);
 					return;
 				}
 				
-				long fileSale = Long.parseLong(readFilesContents.get(1));
-				long saleAmount = branchSales.get(readFilesContents.get(0)) + fileSale;
+				long fileSale = Long.parseLong(FilesContents.get(1));
+				long saleAmount = branchSales.get(FilesContents.get(0)) + fileSale;
 				
 				//売上金額の合計が10桁を超えたか確認 （エラー処理内容2-2）
 				if(saleAmount >= 10000000000L){ 
 					System.out.println(SALES_AMOUNT_ERROR);
 					return;
 				} 
-
-				branchSales.put(readFilesContents.get(0), saleAmount);
+				
+				branchSales.put(FilesContents.get(0), saleAmount);
 
 			}
-		}catch(FileNotFoundException e){
-			System.out.println(FILE_NOT_EXIST);
 		}catch(IOException e){
 			System.out.println(UNKNOWN_ERROR);
-		}catch(NumberFormatException e) {
-			System.out.println(FILE_INVALID_FORMAT);
 		}finally {
 			if(br != null) {
 				try {
 					br.close();
 				} catch(IOException e) {
 					System.out.println(UNKNOWN_ERROR);
+					return;
 				}
 			}
 		}
@@ -165,7 +161,7 @@ public class CalculateSales {
 				// ※ここの読み込み処理を変更してください。(処理内容1-2)
 				String [] items = line.split(",");
 				// 支店定義ファイルのフォーマットチェック（エラー処理内容1）
-				if(items.length != 2 || !items[0].matches("[0-9]{3}")) {
+				if(items.length != 2 || !items[0].matches("^[0-9]{3}$")) {
 					System.out.println(FILE_INVALID_FORMAT);
 					return false;
 				}
@@ -210,7 +206,7 @@ public class CalculateSales {
 			bw = new BufferedWriter(fw);
 
             for(String key : branchNames.keySet()) {
-            	bw.write(key+","+branchNames.get(key)+","+ Integer.valueOf(branchSales.get(key).toString()));
+            	bw.write(key + "," + branchNames.get(key) + "," + branchSales.get(key));
             	bw.newLine();
             }
 			
