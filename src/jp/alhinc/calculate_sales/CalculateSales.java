@@ -48,6 +48,7 @@ public class CalculateSales {
 		//コマンドライン引数が渡されているか確認(エラー処理内容3)
 		if (args.length != 1) {
 			System.out.println(UNKNOWN_ERROR);
+			return;
 		}
 		
 		// 支店コードと支店名を保持するMap
@@ -84,8 +85,8 @@ public class CalculateSales {
 		// 売上ファイルが連番か確認（エラー処理内容2-1）
 		Collections.sort(rcdFiles);
 		for(int i = 0; i < rcdFiles.size() - 1; i++ ) {
-			int former = Integer.parseInt(rcdFiles.get(i).getName().toString().substring(0, 8)); 
-			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().toString().substring(0, 8)); 
+			int former = Integer.parseInt(rcdFiles.get(i).getName().substring(0, 8)); 
+			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().substring(0, 8)); 
 			if((latter - former) != 1) {
 				System.out.println(FILE_NOT_SEQUENTIAL_NUMBER);
 				return;
@@ -95,45 +96,45 @@ public class CalculateSales {
 			for(int i = 0; i < rcdFiles.size(); i++) {
 				FileReader fr = new FileReader(rcdFiles.get(i));
 				br = new BufferedReader(fr);
-				List<String> FilesContents = new ArrayList<>();
+				List<String> filesContents = new ArrayList<>();
 
 				String line;
 				while((line = br.readLine()) != null) {
-					FilesContents.add(line);
+					filesContents.add(line);
 				}
 				//売上ファイルのフォーマットを確認（エラー処理内容2-4）
-				if(FilesContents.size() != 3) {
+				if(filesContents.size() != 3) {
 					System.out.println(rcdFiles.get(i).getName() + SALES_FILE_INVALID_FORMAT);
 					return;
 				}
 				
 				//Mapに特定のKeyが存在するか確認（エラー処理内容2-3）
-				if(!branchNames.containsKey(FilesContents.get(0))) {
+				if(!branchNames.containsKey(filesContents.get(0))) {
 					System.out.println(rcdFiles.get(i).getName() + BRANCH_CODE_INVALID);
 					return;
 				}
 				
 				//Mapに特定のKeyが存在するか確認（商品コード）
-				if(!commodityNames.containsKey(FilesContents.get(1))) {
+				if(!commodityNames.containsKey(filesContents.get(1))) {
 					System.out.println(rcdFiles.get(i).getName() + COMMODITY_CODE_INVALID);
 					return;
 				}
 				
 				//商品コードがアルファベットと数字、8桁固定なのか確認
-				if(!FilesContents.get(1).matches("^[a-zA-Z0-9]{8}$")) {
+				if(!filesContents.get(1).matches("^[a-zA-Z0-9]{8}$")) {
 					System.out.println(UNKNOWN_ERROR);
 					return;
 				}
 				
 				//売上金額が数字なのか確認（エラー処理内容3）
-				if(!FilesContents.get(2).matches("^\\d+$")) {
+				if(!filesContents.get(2).matches("^\\d+$")) {
 					System.out.println(UNKNOWN_ERROR);
 					return;
 				}
 				
-				long fileSale = Long.parseLong(FilesContents.get(2));
-				long saleAmount = branchSales.get(FilesContents.get(0)) + fileSale;
-				long commoditySaleAmount = commoditySales.get(FilesContents.get(1)) + fileSale;
+				long fileSale = Long.parseLong(filesContents.get(2));
+				long saleAmount = branchSales.get(filesContents.get(0)) + fileSale;
+				long commoditySaleAmount = commoditySales.get(filesContents.get(1)) + fileSale;
 				
 				//売上金額の合計が10桁を超えたか確認 （エラー処理内容2-2）
 				if(saleAmount >= 10000000000L){ 
@@ -147,8 +148,8 @@ public class CalculateSales {
 					return;
 				} 
 				
-				branchSales.put(FilesContents.get(0), saleAmount);
-				commoditySales.put(FilesContents.get(1), commoditySaleAmount);
+				branchSales.put(filesContents.get(0), saleAmount);
+				commoditySales.put(filesContents.get(1), commoditySaleAmount);
 
 			}
 		}catch(IOException e){
