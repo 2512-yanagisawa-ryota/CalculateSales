@@ -122,7 +122,6 @@ public class CalculateSales {
 					System.out.println(rcdFiles.get(i).getName() + COMMODITY_CODE_INVALID);
 					return;
 				}
-
 				
 				//売上金額が数字なのか確認
 				if(!filesContents.get(2).matches("^\\d+$")) {
@@ -187,7 +186,7 @@ public class CalculateSales {
 	 * @param 商品コードと売上金額を保持するMap
 	 * @return 読み込み可否
 	 */
-	private static boolean readFile(String path, String fileName, Map<String, String> Names, Map<String, Long> Sales, String Regex, String notExistMessage, String invalidFormatMessage) {
+	private static boolean readFile(String path, String fileName, Map<String, String> names, Map<String, Long> sales, String regex, String notExistMessage, String invalidFormatMessage) {
 		BufferedReader br = null;
 
 		try {
@@ -206,13 +205,13 @@ public class CalculateSales {
 				String [] items = line.split(",");
 				
 				// ファイルのフォーマットチェック
-				if(items.length != 2 || !items[0].matches(Regex)) {
+				if(items.length != 2 || !items[0].matches(regex)) {
 					System.out.println(invalidFormatMessage);
 					return false;
 				}
 				
-				Names.put(items[0],items[1]);
-				Sales.put(items[0], 0L);
+				names.put(items[0],items[1]);
+				sales.put(items[0], 0L);
 			}	
 
 		} catch(IOException e) {
@@ -240,9 +239,11 @@ public class CalculateSales {
 	 * @param ファイル名
 	 * @param 支店コードと支店名を保持するMap
 	 * @param 支店コードと売上金額を保持するMap
+	 * @param 商品コードと商品名を保持するMap
+	 * @param 商品コードと売上金額を保持するMap
 	 * @return 書き込み可否
 	 */
-	private static boolean writeFile(String path, String fileName, Map<String, String> Names, Map<String, Long> Sales) {
+	private static boolean writeFile(String path, String fileName, Map<String, String> names, Map<String, Long> sales) {
 		BufferedWriter bw = null;
 
 		try {
@@ -250,8 +251,8 @@ public class CalculateSales {
 			FileWriter fw = new FileWriter(file);
 			bw = new BufferedWriter(fw);
 
-            for(String key : Names.keySet()) {
-            	bw.write(key + "," + Names.get(key) + "," + Sales.get(key));
+            for(String key : names.keySet()) {
+            	bw.write(key + "," + names.get(key) + "," + sales.get(key));
             	bw.newLine();
             }
 			
